@@ -314,124 +314,53 @@ font_url = font_source[start_url:end_url]
 font = PIL.ImageFont.truetype(io.BytesIO(requests.get(font_url).content), 35)
 
 
-#def get_presentation(question, contexts, DISTANCE, response, display_contexts, display_annotations):
-#    # repeat the question
-#    print(f'**The Question:**\n\n{question}\n\n')
-#    #IPython.display.display(IPython.display.Markdown(f'**The Question:**\n\n{question}\n\n'))
-
-#    # show the answer
-#    #IPython.display.display(IPython.display.Markdown(f'**The Response:**\n\n{response}\n\n'))
-#    print(f'**The Response:**\n\n{response}\n\n')
-#    if display_contexts:
-#        # display the contexts information: page, similarity, hyperlink
-#        context_pres = '**Sources:**\n\n'
-#        pages = []
-#        context_types = [c[4] for c in contexts]
-#        if DISTANCE > 0:
-#            context_pres += f'Note: The {len(contexts) - sum(context_types)} contexts were expanded to gather {sum(context_types)} additional chunks on pages with matches using a similarity distance of {DISTANCE}.\n'
-#        for context in contexts:
-#            page = next(
-#                [d['parsing']['path'], d['parsing']['file'], d['parsing']['page'], d['file_index'], d['page_index']] for
-#                d in files_pages if
-#                d['file_index'] == context[3]['file_index'] and d['page_index'] == context[3]['page_index'])
-#            pages.append(page)
-#            if not context[4]:
-#                context_pres += f'1. {page[0]}{page[1]}#page={page[2]}\n\t* page: {page[2]}, similarity to question is {context[1]:.3f}\n'
-#            # the following is commented out, if uncommented it would also add the expanded contexts to printed list (this can be very long for DISTANCE = 1 which is the full page)
-#            # else:
-#            #    context_pres += f'1. {page[0]}{page[1]}#page={page[2]}\n\t* page: {page[2]}, similarity to primary context is {context[1]:.3f}\n'
-#        #IPython.display.display(IPython.display.Markdown(context_pres))
-#        print(f'Context: {context_pres}')
-
-#    if display_annotations:
-#        # display each page with annotations
-#        IPython.display.display(IPython.display.Markdown('**Annotated Document Pages**\n\n'))
-#        # list of unique pages across contexts: sorted list of tuple(file_index, page_index)
-#        pages = sorted(list(set([(page[3], page[4]) for page in pages])), key=lambda x: (x[0], x[1]))
-#        # list of PIL images for each unique page
-#        images = []
-#        for page in pages:
-#            image = next(d['parsing']['pages'][0]['image']['content'] for d in files_pages if
-#                         d['file_index'] == page[0] and d['page_index'] == page[1])
-#            images.append(
-#                PIL.Image.open(
-#                    io.BytesIO(
-#                        base64.decodebytes(
-#                            image.encode('utf-8')
-#                        )
-#                    )
-#                )
-#            )
-#        # annotate the contexts on the pages:
-#        for c, context in enumerate(contexts):
-#            image = images[pages.index((context[3]['file_index'], context[3]['page_index']))]
-#            vertices = context[3]['vertices']
-#            draw = PIL.ImageDraw.Draw(image)
-#            if not context[4]:
-#                color = 'green'
-#                prefix = 'Source'
-#            else:
-#                color = 'blue'
-#                prefix = 'Expanded Source'
-#            draw.polygon([
-#                vertices[0]['x'], vertices[0]['y'],
-#                vertices[1]['x'], vertices[1]['y'],
-#                vertices[2]['x'], vertices[2]['y'],
-#                vertices[3]['x'], vertices[3]['y']
-#            ], outline=color, width=5)
-#            draw.text(
-#                xy=(vertices[1]['x'], vertices[1]['y']), text=f"{prefix} {c + 1}", fill=color, anchor='rd', font=font
-#            )
-
-#        for image in images:
-#            IPython.display.display(image.resize(tuple([int(.25 * x) for x in image.size])))
-
-#    return
 def get_presentation(question, contexts, DISTANCE, response, display_contexts, display_annotations):
     print(f'**The Question:**\n\n{question}\n\n')
     print(f'**The Response:**\n\n{response}\n\n')
 
     if display_contexts:
         context_pres = '**Sources:**\n\n'
-        pages = []
-        for context in contexts:
+        for index, context in enumerate(contexts, start=1):
             page_info = next(
-                (d for d in files_pages if d['file_index'] == context[3]['file_index'] and d['page_index'] == context[3]['page_index']),
+                (d for d in files_pages if
+                 d['file_index'] == context[3]['file_index'] and d['page_index'] == context[3]['page_index']),
                 None)
             if page_info:
-                page = page_info['parsing']['page']
-                context_pres += f'- Page: {page}, similarity: {context[1]:.3f}\n'
-                pages.append(page_info)
+                # Correctly concatenating the full path to the PDF and the page number
+                pdf_url = page_info['parsing']['path']  # Ensure this variable has the complete path to the PDF
+                page_number = page_info['parsing']['page']
+                # Correctly format the URL to include the PDF filename and page fragment
+                full_url = f"{pdf_url}cigna_member_handbook_2024.pdf#page={page_number}"
+                similarity = context[1]
+                # Formatting the output string to match the provided output example
+                context_pres += f'- Context {index}: [Page {page_number}, similarity: {similarity}]({full_url})\n'
+                # This prints a formatted string similar to the desired output, but without making the URL clickable in a console environment
         print(context_pres)
 
     if display_annotations:
         print('**Annotated Document Pages**\n')
-        for page_info in pages:
-            # Assuming the image is encoded in base64 within the 'page_info'
-            image_data = base64.b64decode(page_info['parsing']['pages'][0]['image']['content'])
-            image = Image.open(io.BytesIO(image_data))
+        pages = sorted(list(set([(context[3]['file_index'], context[3]['page_index']) for context in contexts])),
+                       key=lambda x: (x[0], x[1]))
+        for index, page in enumerate(pages, start=1):
+            image_data = next(d['parsing']['pages'][0]['image']['content'] for d in files_pages if
+                              d['file_index'] == page[0] and d['page_index'] == page[1])
+            image = Image.open(io.BytesIO(base64.b64decode(image_data)))
             draw = ImageDraw.Draw(image)
 
-            # Loop through contexts to find those relevant to this page and annotate
-            for context in [c for c in contexts if c[3]['file_index'] == page_info['file_index'] and c[3]['page_index'] == page_info['page_index']]:
+            for c, context in enumerate(
+                    [ctx for ctx in contexts if (ctx[3]['file_index'], ctx[3]['page_index']) == page]):
                 vertices = context[3]['vertices']
                 color = 'green' if not context[4] else 'blue'
-                draw.polygon([
-                    (vertices[0]['x'], vertices[0]['y']),
-                    (vertices[1]['x'], vertices[1]['y']),
-                    (vertices[2]['x'], vertices[2]['y']),
-                    (vertices[3]['x'], vertices[3]['y']),
-                ], outline=color, width=5)
-                # Optional: Add text if needed
-                # Ensure you have defined 'font' somewhere, or remove this part
-                # draw.text((vertices[0]['x'], vertices[0]['y']), f"{'Source' if not context[4] else 'Expanded Source'}", fill=color, font=font)
+                prefix = 'Source' if not context[4] else 'Expanded Source'
+                draw.polygon([vertices[0]['x'], vertices[0]['y'], vertices[1]['x'], vertices[1]['y'],
+                              vertices[2]['x'], vertices[2]['y'], vertices[3]['x'], vertices[3]['y']], outline=color,
+                             width=5)
+                draw.text((vertices[1]['x'], vertices[1]['y']), f"{prefix} {c + 1}", fill=color, font=font)
 
-            # Save or display the image as needed
-            save_path = f"img/annotated_page_{page_info['file_index']}_{page_info['page_index']}.png"
+            # Save each annotated image
+            save_path = f"img/annotated_page_{page[0]}_{page[1]}.png"
             image.save(save_path)
             print(f"Saved annotated image to {save_path}")
-print("Presentation Functions * These prepare the response for presentation - and display the results.LOADED")
-
 
 def document_bot(question, max_output_tokens=1000, DISTANCE=0, MODEL='GEMINI', display_contexts=False,
                  display_annotations=False, ground=True):
