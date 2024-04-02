@@ -75,27 +75,6 @@ source_documents = [
 # Prior Run Handling
 # Determines whether to use data from a previous run based on the USE_PRIOR_RUN flag
 USE_PRIOR_RUN = True  # Boolean flag to indicate preference for reusing previous data when available
-
-# Initial Analysis Query
-# Defining the first question to guide the analysis or processing of the document
-question = "How are emergency services covered, especially if the provider is out-of-network?"
-
-#print(f"GOOGLE_APPLICATION_CREDENTIALS_PATH: {GOOGLE_APPLICATION_CREDENTIALS_PATH}")
-#print(f"PROJECT_ID: {PROJECT_ID}")
-#print(f"REGION: {REGION}")
-#print(f"EXPERIMENT: {EXPERIMENT}")
-#print(f"SERIES: {SERIES}")
-#print(f"SAVE_IN: {SAVE_IN}")
-#print(f"RETRIEVE_FROM: {RETRIEVE_FROM}")
-#print(f"GCS_BUCKET: {GCS_BUCKET}")
-#print(f"BQ_PROJECT: {BQ_PROJECT}")
-#print(f"BQ_DATASET: {BQ_DATASET}")
-#print(f"BQ_TABLE: {BQ_TABLE}")
-#print(f"BQ_REGION: {BQ_REGION}")
-#print(f"source_documents: {source_documents}")
-#print(f"USE_PRIOR_RUN: {USE_PRIOR_RUN}")
-#print(f"question: {question}")
-
 # Create GCS Bucket
 create_gcs_bucket(PROJECT_ID, GCS_BUCKET, REGION)
 
@@ -114,7 +93,7 @@ docai_client_options = {"api_endpoint": docai_endpoint}
 docai_client = documentai.DocumentProcessorServiceClient(client_options=docai_client_options)
 
 # Document AI asynchronous client
-docai_async_client = documentai.DocumentProcessorServiceAsyncClient(client_options=docai_client_options)
+#docai_async_client = documentai.DocumentProcessorServiceAsyncClient(client_options=docai_client_options)
 
 # Initialize BigQuery client
 bq = bigquery.Client(project=PROJECT_ID)
@@ -386,10 +365,3 @@ def document_bot(question, max_output_tokens=1000, DISTANCE=0, MODEL='GEMINI', d
     get_presentation(question, contexts, DISTANCE, response, display_contexts, display_annotations)
 
     return prompt
-
-question ="What is the process for filing an appeal if a claim is denied?"
-#prompt = document_bot(question, display_contexts = True, display_annotations = True)
-prompt = document_bot(question, max_output_tokens=1000, DISTANCE=0.2, MODEL='GEMINI', display_contexts=True,
-                 display_annotations=True, ground=True)
-# DISTANCE = .1 # float in [0, 1], 0 return no additional context, 1 return all on unique pages
-    # MODEL = 'GEMINI' # one of: GEMINI, PALM_BISON, PALM_BISON32K, PALM_UNICORN
