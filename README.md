@@ -1,0 +1,2 @@
+# Applied Generative AI
+ This repository hosts the implementation of an innovative solution for generative AI tasks on Google Cloud Platform, leveraging the capabilities of Vertex AI. The project demonstrates a sophisticated system designed to parse, understand, and respond to complex queries based on extensive documents. Aimed primarily at technical audiences, this solution integrates cutting-edge machine learning techniques with cloud-based data pipelines, providing a powerful tool for information retrieval and interaction.
