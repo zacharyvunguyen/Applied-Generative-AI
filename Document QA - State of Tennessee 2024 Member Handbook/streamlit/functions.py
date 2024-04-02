@@ -38,6 +38,42 @@ from google.cloud.exceptions import NotFound
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 
+
+# Project and Data Analysis Settings
+PROJECT_ID = 'zacharynguyen-genai'
+REGION = 'us-central1'
+EXPERIMENT = 'cigna-handbook'
+SERIES = 'applied-genai-v3'
+
+# Data Storage and Retrieval Configuration
+SAVE_IN = 'ALL'  # Options: GCS, BQ, ALL
+RETRIEVE_FROM = 'GCS'  # Options: GCS, BQ. Default action is to parse and embed if not present.
+
+# Google Cloud Storage (GCS) Setup
+GCS_BUCKET = PROJECT_ID  # Naming the bucket after the project ID for consistency
+
+# BigQuery (BQ) Setup for Storing Results
+BQ_PROJECT = PROJECT_ID
+BQ_DATASET = SERIES.replace('-', '_')  # Formatting to comply with BQ naming conventions
+BQ_TABLE = EXPERIMENT
+BQ_REGION = REGION[:2]  # Simplified regional code derived from the full region string
+
+# Document Source Configuration
+# Specify the locations of source documents to be processed
+source_documents = [
+    'https://www.tn.gov/content/dam/tn/partnersforhealth/documents/cigna_member_handbook_2024.pdf'
+]
+
+
+# Initialize BigQuery client
+bq = bigquery.Client(project=PROJECT_ID)
+
+# Initialize Google Cloud Storage (GCS) client and get the bucket
+gcs = storage.Client(project=PROJECT_ID)
+bucket = gcs.bucket(GCS_BUCKET)
+
+
+
 def set_gcp_credentials_from_file(credential_path):
     if not os.path.exists(credential_path):
         raise FileNotFoundError(f"Service account key file not found at: {credential_path}")
@@ -45,6 +81,12 @@ def set_gcp_credentials_from_file(credential_path):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credential_path
     print("GCP credentials have been set successfully.")
 
+GOOGLE_APPLICATION_CREDENTIALS_PATH = "/Users/zacharynguyen/Documents/GitHub/2024/Applied-Generative-AI/IAM/zacharynguyen-genai-656c475b142a.json"
+try:
+    set_gcp_credentials_from_file(GOOGLE_APPLICATION_CREDENTIALS_PATH)
+except FileNotFoundError as e:
+    print(e)
+    sys.exit(1)
 
 def create_gcs_bucket(project_id, bucket_name, region):
     storage_client = storage.Client(project=project_id)
@@ -111,4 +153,16 @@ def create_bq_dataset_and_table(project_id, dataset_id, table_id, region):
     print(f"Access your table directly: {table_link}")
 
     return table
+
+
+def bq_table_check(table):
+    from google.cloud.exceptions import NotFound
+    try:
+        bq.get_table(table)
+        print(f'Table "{table}" found')
+        return True
+    except NotFound:
+        print(f'Table "{table}" not found')
+        return False
+
 
