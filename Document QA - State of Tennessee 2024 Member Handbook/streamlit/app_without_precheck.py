@@ -326,22 +326,18 @@ def get_presentation(question, contexts, DISTANCE, response, display_contexts, d
                  d['file_index'] == context[3]['file_index'] and d['page_index'] == context[3]['page_index']),
                 None)
             if page_info:
-                # Correctly concatenating the full path to the PDF and the page number
-                pdf_url = page_info['parsing']['path']  # Ensure this variable has the complete path to the PDF
+                pdf_url = page_info['parsing']['path']
                 page_number = page_info['parsing']['page']
-                # Correctly format the URL to include the PDF filename and page fragment
                 full_url = f"{pdf_url}cigna_member_handbook_2024.pdf#page={page_number}"
                 similarity = context[1]
-                # Formatting the output string to match the provided output example
-                context_pres += f'- Context {index}: [Page {page_number}, similarity: {similarity}]({full_url})\n'
-                # This prints a formatted string similar to the desired output, but without making the URL clickable in a console environment
+                context_pres += f'- Context {index}: [Page {page_number}, similarity: {similarity:.3f}]({full_url})\n'
         print(context_pres)
 
     if display_annotations:
         print('**Annotated Document Pages**\n')
         pages = sorted(list(set([(context[3]['file_index'], context[3]['page_index']) for context in contexts])),
                        key=lambda x: (x[0], x[1]))
-        for index, page in enumerate(pages, start=1):
+        for page in pages:
             image_data = next(d['parsing']['pages'][0]['image']['content'] for d in files_pages if
                               d['file_index'] == page[0] and d['page_index'] == page[1])
             image = Image.open(io.BytesIO(base64.b64decode(image_data)))
@@ -352,13 +348,19 @@ def get_presentation(question, contexts, DISTANCE, response, display_contexts, d
                 vertices = context[3]['vertices']
                 color = 'green' if not context[4] else 'blue'
                 prefix = 'Source' if not context[4] else 'Expanded Source'
-                draw.polygon([vertices[0]['x'], vertices[0]['y'], vertices[1]['x'], vertices[1]['y'],
-                              vertices[2]['x'], vertices[2]['y'], vertices[3]['x'], vertices[3]['y']], outline=color,
-                             width=5)
-                draw.text((vertices[1]['x'], vertices[1]['y']), f"{prefix} {c + 1}", fill=color, font=font)
+                similarity_score = context[1]
+                # Now include the similarity score in the annotation
+                annotation_text = f"{prefix} {c + 1} (Similarity: {similarity_score:.3f})"
+                draw.polygon([
+                    (vertices[0]['x'], vertices[0]['y']),
+                    (vertices[1]['x'], vertices[1]['y']),
+                    (vertices[2]['x'], vertices[2]['y']),
+                    (vertices[3]['x'], vertices[3]['y'])
+                ], outline=color, width=5)
+                draw.text((vertices[0]['x'], vertices[0]['y'] - 10), annotation_text, fill=color, font=font)
 
-            # Save each annotated image
-            save_path = f"img/annotated_page_{page[0]}_{page[1]}.png"
+            # Save the annotated image
+            save_path = f"annotated_page_{page[0]}_{page[1]}.png"
             image.save(save_path)
             print(f"Saved annotated image to {save_path}")
 
@@ -387,7 +389,7 @@ def document_bot(question, max_output_tokens=1000, DISTANCE=0, MODEL='GEMINI', d
 
 question ="What is the process for filing an appeal if a claim is denied?"
 #prompt = document_bot(question, display_contexts = True, display_annotations = True)
-prompt = document_bot(question, max_output_tokens=1000, DISTANCE=0.2, MODEL='GEMINI', display_contexts=True,
+prompt = document_bot(question, max_output_tokens=1000, DISTANCE=0, MODEL='GEMINI', display_contexts=True,
                  display_annotations=True, ground=True)
 # DISTANCE = .1 # float in [0, 1], 0 return no additional context, 1 return all on unique pages
     # MODEL = 'GEMINI' # one of: GEMINI, PALM_BISON, PALM_BISON32K, PALM_UNICORN
