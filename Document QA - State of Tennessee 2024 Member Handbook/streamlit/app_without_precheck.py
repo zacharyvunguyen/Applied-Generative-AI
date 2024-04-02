@@ -357,7 +357,7 @@ def get_presentation(question, contexts, DISTANCE, response, display_contexts, d
                     (vertices[2]['x'], vertices[2]['y']),
                     (vertices[3]['x'], vertices[3]['y'])
                 ], outline=color, width=5)
-                draw.text((vertices[0]['x'], vertices[0]['y'] - 10), annotation_text, fill=color, font=font)
+                draw.text((vertices[0]['x'] - 50, vertices[0]['y'] - 50), annotation_text, fill=color, font=font)
 
             # Save the annotated image
             save_path = f"annotated_page_{page[0]}_{page[1]}.png"
@@ -389,7 +389,7 @@ def document_bot(question, max_output_tokens=1000, DISTANCE=0, MODEL='GEMINI', d
 
 question ="What is the process for filing an appeal if a claim is denied?"
 #prompt = document_bot(question, display_contexts = True, display_annotations = True)
-prompt = document_bot(question, max_output_tokens=1000, DISTANCE=0, MODEL='GEMINI', display_contexts=True,
+prompt = document_bot(question, max_output_tokens=1000, DISTANCE=0.2, MODEL='GEMINI', display_contexts=True,
                  display_annotations=True, ground=True)
 # DISTANCE = .1 # float in [0, 1], 0 return no additional context, 1 return all on unique pages
     # MODEL = 'GEMINI' # one of: GEMINI, PALM_BISON, PALM_BISON32K, PALM_UNICORN
