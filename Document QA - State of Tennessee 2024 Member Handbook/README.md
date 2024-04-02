@@ -5,11 +5,11 @@
 ## Overview
 
 The healthcare benefits landscape is continually evolving, making it imperative for members to have access to precise, tailored information. This project introduces an innovative Document Q&A system designed to transform member interaction with their healthcare benefits handbooks. By allowing users to pose specific questions, the system delivers exact answers sourced directly from the official Member Handbooks, including the Cigna Member Handbook for 2024 and the 2024 HCA Healthcare Benefits Brochure.
-<p align="center">
-  <img src="Document QA - State of Tennessee 2024 Member Handbook/Document QA - 2024 HCA Healthcare Benefit/img/question.png" alt="Image 1" width="400"/>
-  <img src="Document QA - State of Tennessee 2024 Member Handbook/Document QA - 2024 HCA Healthcare Benefit/img/Source.png")Media/Analyze Transactions from BigQuery.gif" alt="Image 2" width="400"/> 
-</p>
-
+![question.png](Document%20QA%20-%202024%20HCA%20Healthcare%20Benefit%2Fimg%2Fquestion.png)
+![Source.png](Document%20QA%20-%202024%20HCA%20Healthcare%20Benefit%2Fimg%2FSource.png)
+![img.png](Document%20QA%20-%202024%20HCA%20Healthcare%20Benefit%2Fimg%2Fimg.png)
+![img_2.png](Document%20QA%20-%202024%20HCA%20Healthcare%20Benefit%2Fimg%2Fimg_2.png)
+![img_1.png](Document%20QA%20-%202024%20HCA%20Healthcare%20Benefit%2Fimg%2Fimg_1.png)
 ## Objectives
 
 - **Provide Instant Access:** Members can swiftly uncover details about their healthcare benefits without sifting through extensive documents.
