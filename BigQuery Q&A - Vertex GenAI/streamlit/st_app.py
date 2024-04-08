@@ -33,16 +33,46 @@ gemini_model = vertexai.preview.generative_models.GenerativeModel("gemini-pro")
 st.sidebar.title("Navigation")
 app_mode = st.sidebar.radio("Choose a view",
                             ["App Description", "Query Analysis"])
+st.sidebar.markdown("""
+## BigQuery Configuration
+**Project:** `bigquery-public-data`  
+**Dataset:** `sdoh_cdc_wonder_natality`  
+**Tables:**  
+- `county_natality`  
+- `county_natality_by_mother_race`  
+- `county_natality_by_father_race`  
+""")
 
 if app_mode == "App Description":
-    st.title("BigQuery Insights Explorer")
+    st.title("BigQuery Insights Explorer 🚀")
     st.markdown("""
-    This app leverages Google Cloud's BigQuery and Vertex AI to analyze data and generate insights. 
-    By entering a question related to the predefined BigQuery datasets, the app dynamically generates SQL queries, 
-    executes them to fetch relevant data, and uses AI to provide insights based on the query results. 
+    The app, ingeniously designed to bridge the gap between complex data queries and intuitive natural language processing (NLP) 🧠, revolutionizes the way we interact with large datasets. 
+    At its core, it utilizes the potent capabilities of Google Cloud's BigQuery 🌐 for data storage and querying, alongside Vertex AI's advanced machine learning models 🤖. 
+    This blend of technologies empowers users to extract meaningful insights from vast datasets using simple, natural language questions 🗣️.
 
-    Whether you're exploring data correlations or seeking answers from your datasets, this app streamlines the process, 
-    combining the power of BigQuery's data warehousing with the advanced natural language processing capabilities of Vertex AI.
+    ### Purpose of the App 🎯
+
+    The primary purpose of this app is to democratize data analysis, making it accessible to users without extensive expertise in SQL or data science 🔍. 
+    By allowing users to input questions in natural language, the app abstracts the complexity of formulating SQL queries and interpreting raw data outputs. 
+    It's particularly beneficial for quick data explorations, hypothesis testing, or gaining insights from data without the need to dive into the technical nuances of database querying languages.
+
+    ### Potential of the App 🔥
+
+    The app's potential is vast, ranging from business intelligence and market research to academic research and beyond 📊. 
+    By harnessing the power of BigQuery, it can handle petabytes of data, making it suitable for analyzing extensive datasets like user interactions, financial transactions, or scientific data. 
+    Furthermore, the integration with Vertex AI models opens up possibilities for automated data analysis, error correction in query formulations, and generating sophisticated insights that would typically require a data analyst or scientist 🧑‍🔬.
+
+    ### How to Use the App 📝
+
+    Using the app is straightforward:
+
+    1. **Input Your Question**: Start by typing a question about your data in the provided text input field. The question should be related to the datasets you have access to in BigQuery and can be as simple or complex as needed.
+    2. **Analysis and Query Generation**: Once you submit your question, the app uses a code generation model from Vertex AI to translate your natural language question into a SQL query tailored for BigQuery.
+    3. **Error Handling and Correction**: If the generated query contains errors or is not optimized, the app employs a code chat model to iteratively fix the issues, ensuring the final query is both valid and efficient.
+    4. **Insight Generation**: With a successful query, the app then leverages another generative AI model to analyze the query results and present insights in an easily understandable format.
+    5. **Review Results**: You can review the generated query, any corrections made, and the final insights directly within the app's interface.
+
+    This app stands as a testament to the innovative application of AI in the realm of data analysis, simplifying complex processes and making data-driven insights more accessible to a broader audience 🌟.
     """)
 elif app_mode == "Query Analysis":
     # UI for Query Analysis
