@@ -29,50 +29,73 @@ textgen_model = vertexai.language_models.TextGenerationModel.from_pretrained('te
 codegen_model = vertexai.language_models.CodeGenerationModel.from_pretrained('code-bison@002')
 gemini_model = vertexai.preview.generative_models.GenerativeModel("gemini-pro")
 
-# Display the UI component for inputting the question
-question = st.text_input("Enter your question:", "Example: Is there a correlation between pre-pregnancy BMI and birth weight?")
+# Sidebar for app navigation
+st.sidebar.title("Navigation")
+app_mode = st.sidebar.radio("Choose a view",
+                            ["App Description", "Query Analysis"])
 
-def BQ_QA(question, max_fixes=10):
-    # Fetch schema columns for BigQuery
-    BQ_PROJECT = 'bigquery-public-data'
-    BQ_DATASET = 'sdoh_cdc_wonder_natality'
-    BQ_TABLES = ['county_natality', 'county_natality_by_mother_race', 'county_natality_by_father_race']
-    query = f"""
-        SELECT * EXCEPT(field_path, collation_name, rounding_mode)
-        FROM `{BQ_PROJECT}.{BQ_DATASET}.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS`
-        WHERE table_name in ({','.join([f'"{table}"' for table in BQ_TABLES])})
-    """
-    schema_columns = bq.query(query=query).to_dataframe()
+if app_mode == "App Description":
+    st.title("BigQuery Insights Explorer")
+    st.markdown("""
+    This app leverages Google Cloud's BigQuery and Vertex AI to analyze data and generate insights. 
+    By entering a question related to the predefined BigQuery datasets, the app dynamically generates SQL queries, 
+    executes them to fetch relevant data, and uses AI to provide insights based on the query results. 
 
-    # Generate the initial query
-    initial_query_text = initial_query(question, schema_columns)
-    st.text_area("Generated Query:", initial_query_text, height=100)
+    Whether you're exploring data correlations or seeking answers from your datasets, this app streamlines the process, 
+    combining the power of BigQuery's data warehousing with the advanced natural language processing capabilities of Vertex AI.
+    """)
+elif app_mode == "Query Analysis":
+    # UI for Query Analysis
+    st.title("Query Analysis")
+    question = st.text_input("Enter your question:",
+                             "Example: Which mother's single race category reports the highest average number of births??")
 
-    # Run the query and handle errors if any
-    query_job = bq.query(query=initial_query_text)
-    if query_job.errors:
-        st.error('Errors found in the query. Attempting to fix...')
-        fixed_query, query_job, fix_tries, codechat = fix_query(initial_query_text, max_fixes)
+
+    def BQ_QA(question, max_fixes=10):
+        # Fetch schema columns for BigQuery
+        BQ_PROJECT = 'bigquery-public-data'
+        BQ_DATASET = 'sdoh_cdc_wonder_natality'
+        BQ_TABLES = ['county_natality', 'county_natality_by_mother_race', 'county_natality_by_father_race']
+        query = f"""
+            SELECT * EXCEPT(field_path, collation_name, rounding_mode)
+            FROM `{BQ_PROJECT}.{BQ_DATASET}.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS`
+            WHERE table_name in ({','.join([f'"{table}"' for table in BQ_TABLES])})
+        """
+        schema_columns = bq.query(query=query).to_dataframe()
+
+        # Generate the initial query
+        initial_query_text = initial_query(question, schema_columns)
+        #st.text_area("Generated Query:", initial_query_text, height=300)
+        st.code(initial_query_text,language='sql')
+
+        # Run the query and handle errors if any
+        query_job = bq.query(query=initial_query_text)
         if query_job.errors:
-            st.error(f'No answer generated after {fix_tries} attempts.')
-            # Optionally display the chat history for debugging
-            # for message in codechat.get_chat_history():
-            #     st.text(message)
+            st.error('Errors found in the query. Attempting to fix...')
+            fixed_query, query_job, fix_tries, codechat = fix_query(initial_query_text, max_fixes)
+            if query_job.errors:
+                st.error(f'No answer generated after {fix_tries} attempts.')
+                # Optionally display the chat history for debugging
+                # for message in codechat.get_chat_history():
+                #     st.text(message)
+            else:
+                st.success('Query fixed and executed successfully.')
+                results = query_job.to_dataframe()
+                st.dataframe(results)
         else:
-            st.success('Query fixed and executed successfully.')
+            st.success('Query executed successfully.')
             results = query_job.to_dataframe()
             st.dataframe(results)
-    else:
-        st.success('Query executed successfully.')
-        results = query_job.to_dataframe()
-        st.dataframe(results)
 
-    # Generate and display insights from the query results if there are no errors
-    if not query_job.errors:
-        question_response = answer_question(question, query_job)
-        st.markdown("## Insights")
-        st.write(question_response)
+        # Generate and display insights from the query results if there are no errors
+        if not query_job.errors:
+            question_response = answer_question(question, query_job)
+            st.markdown("## Insights")
+            st.write(question_response)
 
-# Button to trigger the BQ_QA process
-if st.button('Analyze'):
-    BQ_QA(question)
+
+    # Function body as previously defined
+
+    # Trigger the BQ_QA process
+    if st.button('Analyze'):
+        BQ_QA(question)
