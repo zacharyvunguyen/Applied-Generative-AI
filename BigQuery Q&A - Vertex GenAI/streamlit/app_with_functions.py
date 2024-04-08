@@ -166,6 +166,7 @@ def answer_question(question, query_job):
 Please derive insights from: {question}
 Utilize the statistics from the BigQuery table relevant to this inquiry. Emphasize crucial discoveries and their implications for strategic actions, ensuring to mention specific statistics where possible. Avoid repeating the question or detailing the dataset's context.
 
+
 Use this data:
 {result.to_markdown(index=False)}
     """
