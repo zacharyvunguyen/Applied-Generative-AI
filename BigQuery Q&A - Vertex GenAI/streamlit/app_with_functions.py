@@ -1,3 +1,4 @@
+import streamlit as st
 import os
 # Import Google Cloud and Vertex AI libraries
 from google.cloud import bigquery
@@ -197,4 +198,5 @@ def BQ_QA(question, max_fixes=10, schema_columns=schema_columns):
         except:
             return None
 
-session = BQ_QA(question)
+question = "Is there a correlation between pre-pregnancy BMI and birth weight?"
+section = BQ_QA(question)
