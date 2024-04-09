@@ -55,6 +55,8 @@ context (BigQuery Table Schema):
 
 Write a query for Google BigQuery using fully qualified table names to answer this question:
 {question}
+Note: Specifically, when filtering data by county, use 'County_of_Residence_FIPS' rather than 'County_of_Residence' to ensure precision and accuracy. 
+For example, avoid using WHERE clauses like `County_of_Residence = 'Davidson County'` and instead use `County_of_Residence_FIPS = '47037'` for filtering."
 """
 
     context_query = codegen_model.predict(context_prompt, max_output_tokens=256)
@@ -89,10 +91,9 @@ BigQuery SQL query that needs to be fixed:
 {query}
 
 Instructions:
-As users submit their queries along with the errors encountered in BigQuery, provide corrective feedback to rectify these issues. 
-It's crucial that the revised queries continue to address the original question posed. 
-For queries involving county data, although the "County_of_Residence" and "County_of_Residence_FIPS" columns convey similar information, the "County_of_Residence_FIPS" column is preferred for its higher accuracy. 
-Please note that the "County_of_Residence" column presents data in the format of 'county, State' (e.g., "Unidentified Counties, IL")
+"As the user provides versions of the query and the errors returned by BigQuery, offer suggestions that correct these errors, ensuring each revised query accurately addresses the original question. 
+Specifically, when filtering data by county, use 'County_of_Residence_FIPS' rather than 'County_of_Residence' to ensure precision and accuracy. For example, avoid using WHERE clauses like `County_of_Residence = 'Davidson County'` and instead use `County_of_Residence_FIPS = '47037'` for filtering."
+
 """
     )
 
@@ -162,8 +163,14 @@ def answer_question(question, query_job):
     # answer question
     result = query_job.to_dataframe()
     question_prompt = f"""
-Please derive insights from: {question}
-Utilize the statistics from the BigQuery table relevant to this inquiry. Emphasize crucial discoveries and their implications for strategic actions, ensuring to mention specific statistics where possible. Avoid repeating the question or detailing the dataset's context.
+"Analyze the dataset in relation to: '{question}'. 
+Identify critical statistical insights within the BigQuery table data. 
+Utilize these insights to construct detailed, actionable recommendations. 
+Your analysis should directly address the core of the question, focusing on specific findings 
+that can guide data-driven decision-making. Avoid broad summaries or restating the question. 
+Highlight how the data supports each insight, providing a clear path from analysis to action for a data scientist or analyst."
+
+
 
 Use this data:
 {result.to_markdown(index=False)}
