@@ -288,6 +288,6 @@ elif app_mode == "Query Analysis":
 
 
     # GUI for question input
-    question = st.text_input("Enter your question:", "Is there a seasonal pattern to the number of births in 2018?")
+    question = st.text_input("Enter your question:", "Average baby weights across counties in Tennessee?")
     if st.button('Analyze'):
         BQ_QA(question)
