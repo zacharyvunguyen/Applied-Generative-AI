@@ -1,0 +1,1 @@
+# Intelligent Query Crafting with BigQuery Context: Leveraging Vertex GenAI for Enhanced Business Insights on GCP
