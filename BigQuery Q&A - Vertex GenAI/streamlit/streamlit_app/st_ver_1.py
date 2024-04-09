@@ -227,6 +227,14 @@ if app_mode == "App Description":
 
     1. Which mother's single race category reports the highest average number of births?
     2. How does the average gestational age at birth vary by the mother's single race?
+    3. What is the average age of mothers for each mother's single race category?
+    4.What is the annual trend in birth rates for Davidson, TN?
+    5.Average baby weights across counties in Tennessee?
+    6.What has been the trend in the number of births in Davidson County, TN, from year to year? Is there an increase or decrease?
+    7.Is there a correlation between the average birth weight and the average number of prenatal visits in Davidson County, TN?
+    8.What is the most common race of mothers giving birth in Davidson County, TN, according to the "Mothers_Single_Race" field?
+    9.How do the average weights of newborns vary by county in Tennessee?
+
     This app stands as a testament to the innovative application of AI in the realm of data analysis, simplifying complex processes and making data-driven insights more accessible to a broader audience 🌟.
     """)
 elif app_mode == "Query Analysis":
