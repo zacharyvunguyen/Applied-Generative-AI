@@ -4,7 +4,7 @@ from google.cloud import bigquery
 import vertexai
 import vertexai.language_models
 import vertexai.preview.generative_models
-#from functions import initial_query,codechat_start,fix_query,answer_question
+
 
 # Set environment variables for Google Cloud credentials and TensorFlow logging level
 GOOGLE_APPLICATION_CREDENTIALS = "/Users/zacharynguyen/Documents/GitHub/2024/Applied-Generative-AI/IAM/zacharynguyen-genai-656c475b142a.json"
@@ -40,9 +40,8 @@ query = f"""
     WHERE table_name in ({','.join([f'"{table}"' for table in BQ_TABLES])})
 """
 schema_columns = bq.query(query=query).to_dataframe()
-question = "Is there a seasonal pattern to the number of births in 2018?"
 
-#
+##FUNCTIONS
 def initial_query(question, schema_columns):
     # code generation model
     codegen_model = vertexai.language_models.CodeGenerationModel.from_pretrained('code-bison@002')
@@ -168,46 +167,3 @@ Use this data:
     question_response = gemini_model.generate_content(question_prompt)
 
     return question_response.text
-
-
-def BQ_QA(question, max_fixes=10):
-    # Fetch schema columns for BigQuery
-    BQ_PROJECT = 'bigquery-public-data'
-    BQ_DATASET = 'sdoh_cdc_wonder_natality'
-    BQ_TABLES = ['county_natality', 'county_natality_by_mother_race', 'county_natality_by_father_race']
-    query = f"""
-        SELECT * EXCEPT(field_path, collation_name, rounding_mode)
-        FROM `{BQ_PROJECT}.{BQ_DATASET}.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS`
-        WHERE table_name in ({','.join([f'"{table}"' for table in BQ_TABLES])})
-    """
-    bq_client = bigquery.Client()
-    schema_columns = bq_client.query(query=query).to_dataframe()
-
-    # Generate the initial query
-    initial_query_text = initial_query(question, schema_columns)
-    print("Generated Query:")
-    print(initial_query_text)
-
-    # Run the query and handle errors if any
-    query_job = bq_client.query(query=initial_query_text)
-    if query_job.errors:
-        print('Errors found in the query. Attempting to fix...')
-        fixed_query, query_job, fix_tries, codechat = fix_query(initial_query_text, max_fixes)
-        if query_job.errors:
-            print(f'No answer generated after {fix_tries} attempts.')
-        else:
-            print('Query fixed and executed successfully.')
-            results = query_job.to_dataframe()
-            print(results)
-    else:
-        print('Query executed successfully.')
-        results = query_job.to_dataframe()
-        print(results)
-
-    # Generate and display insights from the query results if there are no errors
-    if not query_job.errors:
-        question_response = answer_question(question, query_job)
-        print("## Insights")
-        print(question_response)
-
-BQ_QA("what are number of births in each month of 2018?")

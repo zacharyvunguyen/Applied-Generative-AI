@@ -32,16 +32,17 @@ gemini_model = vertexai.preview.generative_models.GenerativeModel("gemini-pro")
 # Sidebar for app navigation
 st.sidebar.title("Navigation")
 app_mode = st.sidebar.radio("Choose a view",
-                            [ "Query Analysis","App Description",])
-st.sidebar.markdown("""
-## BigQuery Configuration
-**Project:** `bigquery-public-data`  
-**Dataset:** `sdoh_cdc_wonder_natality`  
-**Tables:**  
-- `county_natality`  
-- `county_natality_by_mother_race`  
-- `county_natality_by_father_race`  
-""")
+                            ["App Description", "Query Analysis"])
+# Sidebar for dynamic BigQuery configuration
+st.sidebar.markdown("## BigQuery Configuration")
+# Allow users to input the project ID, dataset name, and table names
+bq_project = st.sidebar.text_input("Project ID", value="bigquery-public-data", help="Enter the Google Cloud BigQuery project ID.")
+bq_dataset = st.sidebar.text_input("Dataset", value="sdoh_cdc_wonder_natality", help="Enter the dataset name within the project.")
+bq_tables_input = st.sidebar.text_area("Tables", value="county_natality, county_natality_by_mother_race, county_natality_by_father_race", help="Enter the table names, separated by commas.")
+
+# Process the table names input into a list
+bq_tables = [table.strip() for table in bq_tables_input.split(',')]
+
 
 if app_mode == "App Description":
     st.title("BigQuery Insights Explorer 🚀")
@@ -71,11 +72,7 @@ if app_mode == "App Description":
     3. **Error Handling and Correction**: If the generated query contains errors or is not optimized, the app employs a code chat model to iteratively fix the issues, ensuring the final query is both valid and efficient.
     4. **Insight Generation**: With a successful query, the app then leverages another generative AI model to analyze the query results and present insights in an easily understandable format.
     5. **Review Results**: You can review the generated query, any corrections made, and the final insights directly within the app's interface.
-    
-    Sample questions:
 
-    1. Which mother's single race category reports the highest average number of births?
-    2. How does the average gestational age at birth vary by the mother's single race?
     This app stands as a testament to the innovative application of AI in the realm of data analysis, simplifying complex processes and making data-driven insights more accessible to a broader audience 🌟.
     """)
 elif app_mode == "Query Analysis":
@@ -85,11 +82,11 @@ elif app_mode == "Query Analysis":
                              "Example: Which mother's single race category reports the highest average number of births??")
 
 
-    def BQ_QA(question, max_fixes=10):
+    def BQ_QA(question,bq_project, bq_dataset, max_fixes=10):
         # Fetch schema columns for BigQuery
-        BQ_PROJECT = 'bigquery-public-data'
-        BQ_DATASET = 'sdoh_cdc_wonder_natality'
-        BQ_TABLES = ['county_natality', 'county_natality_by_mother_race', 'county_natality_by_father_race']
+        BQ_PROJECT = bq_project
+        BQ_DATASET = bq_dataset
+        BQ_TABLES = bq_tables
         query = f"""
             SELECT * EXCEPT(field_path, collation_name, rounding_mode)
             FROM `{BQ_PROJECT}.{BQ_DATASET}.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS`
@@ -132,4 +129,4 @@ elif app_mode == "Query Analysis":
 
     # Trigger the BQ_QA process
     if st.button('Analyze'):
-        BQ_QA(question)
+        BQ_QA(question,bq_project, bq_dataset)
